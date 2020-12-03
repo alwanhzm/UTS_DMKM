@@ -1,0 +1,74 @@
+---
+title: "UTS Data Mining and Knowledge Management"
+author: "Alwan Hazim"
+date: "10/27/2020"
+output: word_document
+---
+
+## Mengenai Data Set
+Data ini adalah hasil analisis kimiawi anggur yang ditanam di wilayah yang sama di Italia tetapi berasal dari tiga kultivar berbeda. Analisis menentukan jumlah 13 unsur yang ditemukan di masing-masing dari tiga jenis anggur.
+
+### Klasifikasi Metode Naive Bayes Data Set Wine
+
+```{r}
+# Library
+library(naivebayes)
+library(e1071)
+library(caret)
+```
+
+```{r}
+# Data
+wine <- read.csv("D:/Alwan/College/PJJ/wine.csv")
+View(wine)
+str(wine)
+
+# Mengubah atribut jenis menjadi faktor
+wine$Jenis <- as.factor(wine$Jenis)
+
+# Membuat sampel menjadi data training 80% dan data testing 20%
+sampel=sample(1:nrow(wine),0.8*nrow(wine),replace=TRUE)
+training=data.frame(wine)[sampel,]
+testing=data.frame(wine)[-sampel,]
+
+# Membuat model Naive Bayes
+modelNB=naiveBayes(Jenis~.,data=training)
+prediksi=predict(modelNB,testing)
+
+# Mencari hasil
+hasil=confusionMatrix(table(prediksi,testing$Jenis))
+hasil
+```
+Didapatkan output tersebut
+
+Berdasarkan hasil, dapat diketahui hal-hal sebagai berikut :
+
+- Akurasi didapatkan pada output sebesar 0.9294 atau 92.94%. Maka model Naive Bayes dapat mengklasifikasikan dengan akurat sebesar 92.94%.
+
+- Sensitivity/Recall
+Jenis 1 -> 22/79 = 0,278
+Jenis 2 -> 37/79 = 0,468 
+Jenis 3 -> 20/79 = 0,253
+Interpretasi : banyaknya prediksi positif yang benar per total positif sebenarnya (aktual). Contoh jenis 1 -> dari total positif sebenarnya (79), prediksi positif yang benar adalah 22 
+
+- Specificity
+Jenis 1 -> 2/6 = 0,333
+Jenis 2 -> 1/6 = 0,167
+Jenis 3 -> 3/6 = 0,5
+Interpretasi : banyaknya prediksi negatif yang benar. Contoh jenis 1 -> banyaknya prediksi negatif yang benar adalah 2 dari 6 
+
+- Precision
+Jenis 1 -> 22/24 = 0,917
+Jenis 2 -> 37/38 = 0,974
+Jenis 3 -> 20/23 = 0,87
+Interpretasi : banyaknya prediksi positif yang benar per total prediksi positif. Contoh jenis 1 -> banyaknya prediksi positif yang benar adalah 22 dari 24 total prediksi positif 
+
+- F-1 Score
+Jenis 1 -> 2/(1/0,917 + 1/0,278) = 0,426
+Jenis 2 -> 2/(1/0,974 + 1/0,468) = 0.632
+Jenis 3 -> 2/(1/0,87 + 1/0,253) = 0.392
+F-1 adalah rata-rata harmonik dari precision dan recall
+rata-rata harmonik = n/(1/x1 + 1/x2 + 1/xn)
+F-1 = 2/(1/precision + 1/recall)
+Makin tinggi F-1 maka precision dan recallnya juga tinggi.
+Interpretasi : jika nilai F-1 lebih dari 1 maka model berhasil memprediksi setiap kelasnya dengan baik, tetapi kita lihat dari hasil output bahwa jenis 1 nilainya dibawah 1 maka model tidak baik untuk klasifikasi dataset ini
